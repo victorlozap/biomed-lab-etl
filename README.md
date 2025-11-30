@@ -24,6 +24,16 @@ Se simula un escenario donde 3 sedes clínicas reportan resultados de laboratori
 
 ---
 
+### 🧩 Resumen de Componentes
+
+<p align="center">
+  <img src="assets/diagrama_proyecto.png" alt="Diagrama de Componentes del Proyecto" width="600">
+</p>
+
+---
+
+---
+
 ## 📂 Estructura del Proyecto
 
 ```bash
