@@ -37,6 +37,7 @@ biomed-lab-etl/
 │   └── 01_etl_pipeline.py           # Script principal ETL
 ├── docker-compose.yml         # Definición de infraestructura
 └── requirements.txt           # Dependencias de Python
+```
 
 
 ## 🚀 Guía de Instalación y Ejecución
