@@ -54,3 +54,12 @@ Tras la centralización, se ejecutó la siguiente consulta SQL para evaluar la s
 
 ```sql
 SELECT fuente_sede, ROUND(AVG(nivel_glucosa), 1) as promedio FROM hechos_glucosa GROUP BY fuente_sede;
+
+### 🚨 Hallazgo Crítico
+Se detectó una anomalía significativa en la **Sede Sur**, la cual presenta un promedio de glucosa superior a **170 mg/dL**, en contraste con el promedio normal (~100 mg/dL) de las otras sedes. 
+
+**Hipótesis:**
+1. Error sistemático en la calibración de los equipos de laboratorio de la Sede Sur.
+2. Factor de riesgo epidemiológico en la población de dicha zona geográfica.
+
+**Siguiente paso:** Se recomienda auditoría técnica inmediata a los equipos de la Sede Sur.

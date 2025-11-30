@@ -38,3 +38,50 @@ biomed-lab-etl/
 ├── docker-compose.yml         # Definición de infraestructura
 └── requirements.txt           # Dependencias de Python
 
+
+## 🚀 Guía de Instalación y Ejecución
+
+Si deseas replicar este proyecto en tu entorno local, sigue estos pasos:
+
+### 1. Prerrequisitos
+* **Docker Desktop** instalado y ejecutándose.
+* **Python 3.8+** instalado.
+* **Git** instalado.
+
+### 2. Clonar el repositorio e instalar dependencias
+```bash
+git clone [https://github.com/TU_USUARIO/biomed-lab-etl.git](https://github.com/TU_USUARIO/biomed-lab-etl.git)
+cd biomed-lab-etl
+
+# Se recomienda usar entorno virtual
+pip install pandas sqlalchemy psycopg2-binary faker openpyxl
+
+
+### 3. Despliegue de Infraestructura (Base de Datos)
+Ejecutar el contenedor de Docker que levantará la instancia de PostgreSQL.
+```bash
+docker-compose up -d
+
+### 4. Ejecución del Pipeline
+El proyecto incluye un generador de datos para simular el entorno hospitalario.
+
+**Paso A: Generar datos de prueba**
+```bash
+python scripts/00_generar_datos_sucios.py
+
+**Paso B: Correr el proceso ETL**
+```bash
+python scripts/01_etl_pipeline.py
+
+## 📊 Resultados e Impacto
+Tras la ejecución del pipeline y el análisis de los datos centralizados, se identificó un **hallazgo crítico**:
+
+> 🚨 **Anomalía Detectada:** La **Sede Sur** presenta un promedio de glucosa de **177.5 mg/dL**, significativamente superior al promedio de la Sede Central (101.3 mg/dL).
+
+Esta discrepancia, visible solo tras la unificación de los datos, sugiere una posible descalibración en los equipos de medición de dicha sede o un factor de riesgo poblacional no atendido.
+
+---
+
+## 👤 Autor
+**Victor Lopez**
+*Ingeniero Biomédico & Analytics Engineer*
