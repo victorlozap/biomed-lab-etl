@@ -53,10 +53,10 @@ Si deseas replicar este proyecto en tu entorno local, sigue estos pasos:
 ```bash
 git clone [https://github.com/TU_USUARIO/biomed-lab-etl.git](https://github.com/TU_USUARIO/biomed-lab-etl.git)
 cd biomed-lab-etl
-```
 
 # Se recomienda usar entorno virtual
 pip install pandas sqlalchemy psycopg2-binary faker openpyxl
+```
 
 
 ### 3. Despliegue de Infraestructura (Base de Datos)
