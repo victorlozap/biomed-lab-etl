@@ -1,0 +1,13 @@
+
+services:
+  warehouse-db:
+    image: postgres:13
+    container_name: biomed_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: biomed_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data

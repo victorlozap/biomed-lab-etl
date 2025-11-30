@@ -1,0 +1,14 @@
+# Ignorar archivos compilados de Python
+__pycache__/
+*.pyc
+
+# Ignorar la carpeta física de la base de datos (Muy importante)
+pg_data/
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar entornos virtuales (si usaras venv)
+venv/
+.env
