@@ -1,85 +1,56 @@
-# 🏥 Proyecto: Centralización de Datos de Laboratorio (Biomed ETL)
+# 🏥 Documentación Técnica: Pipeline ETL Biomédico
 
-## 1. Contexto del Negocio (El "Por qué")
-**Problema:** Un laboratorio clínico tiene 3 sedes. Cada sede genera reportes de exámenes en archivos sucios (Excel/CSV) con formatos distintos. Actualmente, el análisis se hace manual, lo que genera errores y demora la entrega de reportes gerenciales.
+## 1. Contexto del Negocio
+**Problema:** Un laboratorio clínico con 3 sedes descentralizadas genera reportes diarios en formatos no estandarizados (CSV, Excel, JSON). Esto impide la consolidación de información y retrasa la toma de decisiones críticas.
 
-**Objetivo:** Crear un repositorio centralizado (Data Warehouse) que ingeste, limpie y estandarice estos datos automáticamente para permitir análisis en tiempo real.
+**Objetivo:** Construir un Data Warehouse centralizado que permita la ingesta automática, limpieza y análisis de estos datos en tiempo cercano al real.
 
----------
+---
 
-## 2. Decisiones de Arquitectura (El "Cómo" y el "Para qué")
+## 2. Decisiones de Arquitectura
 
-### 🏗️ Decisión 1: Uso de Docker
-* **¿Qué es?**: Una herramienta de contenerización.
-* **¿Por qué lo usamos?**:
-    * **Reproducibilidad:** Evita el problema de "en mi máquina funciona". El entorno es idéntico en desarrollo y producción.
-    * **Aislamiento:** No ensuciamos el sistema operativo (Windows) instalando múltiples versiones de bases de datos.
-    * **Limpieza:** Si el proyecto falla, borramos el contenedor y el sistema queda intacto.
+### 🏗️ Contenedorización (Docker)
+* **Decisión:** Se utiliza Docker para desplegar la base de datos PostgreSQL.
+* **Justificación:** Garantiza que el entorno sea reproducible. Cualquier ingeniero puede clonar el repositorio y levantar la infraestructura con un solo comando (`docker-compose up`), sin lidiar con instalaciones locales o conflictos de versiones.
 
----------
+### 🗄️ Motor de Base de Datos (PostgreSQL)
+* **Decisión:** PostgreSQL 13.
+* **Justificación:** Elegido por su robustez en tipos de datos y conformidad con estándares SQL. Su capacidad nativa para manejar JSONB lo hace ideal para futuros datos médicos semi-estructurados (como FHIR).
 
-### 🗄️ Decisión 2: PostgreSQL como Data Warehouse
-* **¿Qué es?**: Base de datos relacional (RDBMS) open source.
-* **¿Por qué lo elegimos sobre MySQL?**:
-    * **Estándar en Data:** Es la base tecnológica de Redshift (AWS) y similar a BigQuery (Google).
-    * **Manejo de Datos Complejos:** Mejor soporte nativo para JSON (muy común en formatos médicos como FHIR).
-    * **Analítica:** Tiene funciones de ventana (Window Functions) más robustas para análisis estadístico.
+### 🐍 Lenguaje de Orquestación (Python)
+* **Decisión:** Python 3.9 + Pandas + SQLAlchemy.
+* **Justificación:** Pandas ofrece la mayor flexibilidad para manipulación de dataframes y limpieza de datos sucios. SQLAlchemy abstrae la conexión a base de datos, previniendo inyección SQL y facilitando el mantenimiento.
 
----------
+---
 
-### 🐍 Decisión 3: Python como Motor de Ingesta
-* **¿Qué es?**: Lenguaje de programación de propósito general.
-* **¿Por qué lo usamos?**:
-    * **Ecosistema de Datos:** Librerías como `Pandas` son el estándar de oro para manipulación tabular.
-    * **Conectividad:** `SQLAlchemy` permite interactuar con bases de datos (SQL) usando objetos de Python, abstrayendo la complejidad de SQL puro.
-    * **Faker:** Usaremos la librería `Faker` para generar datos sintéticos que simulan información de pacientes (PII) sin comprometer datos reales, cumpliendo normas éticas (HIPAA/GDPR).
+## 3. Estrategia ETL (Extract, Transform, Load)
 
----------
+### Fase 1: Extracción
+Se desarrollaron conectores específicos para cada fuente:
+1. **Sede Central:** Archivos CSV estructurados.
+2. **Sede Norte:** Archivos Excel (.xlsx) con encabezados en inglés.
+3. **Sede Sur:** Archivos JSON anidados y con problemas de calidad (texto sucio).
 
-## 3. Estrategia de Transformación (ETL)
+### Fase 2: Transformación (Limpieza)
+El pipeline aplica las siguientes reglas de negocio:
+* **Normalización de Encabezados:** Todos los campos se renombran al español (`nivel_glucosa`, `fecha_muestra`).
+* **Limpieza de Tipos:** Se eliminan unidades de texto (ej: "108 mg/dL" -> 108) para permitir operaciones matemáticas.
+* **Manejo de Nulos:** Se descartan registros sin mediciones válidas.
+* **Trazabilidad:** Se inyecta la columna `fuente_sede` para auditar el origen del dato.
 
-El desafío es unificar 3 fuentes con esquemas distintos en una **Tabla Maestra**.
+### Fase 3: Carga
+Carga en modo `replace` (para desarrollo) sobre la tabla `hechos_glucosa` en el esquema público de PostgreSQL.
 
-### Esquema de Salida (Target Schema)
-Independientemente de cómo llegue el dato, en nuestra base de datos (Postgres) se guardará siempre con este formato estándar:
+---
 
-| Columna | Tipo SQL | Descripción |
-| :--- | :--- | :--- |
-| `id_paciente` | TEXT | Identificador único del paciente (anónimo) |
-| `fecha_muestra` | TIMESTAMP | Fecha y hora estandarizada de la toma |
-| `nivel_glucosa` | INTEGER | Valor numérico limpio (sin texto "mg/dL") |
-| `fuente_sede` | TEXT | Para trazabilidad (Saber de qué archivo vino) |
+## 4. Ejecución y Pruebas
+El pipeline se ejecuta mediante el script `01_etl_pipeline.py`, procesando exitosamente lotes de datos sintéticos generados con la librería `Faker`.
 
-### Reglas de Limpieza
-1. **Sede Norte (Excel):** Renombrar `Glucose Level` -> `nivel_glucosa`.
-2. **Sede Sur (JSON):** Eliminar la unidad de medida " mg/dL" del texto y convertir a número. Manejar valores nulos (descartar o marcar).
+---
 
----------
+## 5. Análisis de Resultados (Data Analytics)
 
-## 4. Implementación del Pipeline ETL
+Tras la centralización, se ejecutó la siguiente consulta SQL para evaluar la salud poblacional por sede:
 
-### Tecnología Utilizada
-Se construyó un script en Python (`01_etl_pipeline.py`) que actúa como orquestador del flujo de datos.
-
-### Fases del Proceso
-#### 1. Extracción (Extract)
-* Se utilizan conectores específicos de Pandas para cada formato:
-    * `read_csv` para Sede Central.
-    * `read_excel` (motor openpyxl) para Sede Norte.
-    * `read_json` para Sede Sur.
-
-#### 2. Transformación (Transform)
-Se aplica **lógica de negocio** para normalizar los datos antes de que toquen la base de datos:
-* **Estandarización de Esquema:** Se renombran columnas dispares (`Glucose Level`, `resultado_glucosa`) al estándar `nivel_glucosa`.
-* **Limpieza de Datos (Data Cleaning):**
-    * En la Sede Sur, se eliminan sufijos de texto (" mg/dL") para convertir el campo a numérico (`Integer`).
-    * Se eliminan registros nulos que no aportan valor clínico.
-* **Enriquecimiento:** Se agrega la columna `fuente_sede` para mantener la trazabilidad del dato (Data Lineage).
-
-#### 3. Carga (Load)
-* Se utiliza `SQLAlchemy` para crear una conexión segura con el contenedor Docker.
-* Modo de carga: `if_exists='replace'` (para desarrollo/pruebas). En producción se cambiaría a `'append'` (incremental).
-
-### Resultado
-* **Input:** 3 archivos heterogéneos y sucios.
-* **Output:** Tabla `hechos_glucosa` en PostgreSQL con esquema unificado y tipos de datos correctos.
+```sql
+SELECT fuente_sede, ROUND(AVG(nivel_glucosa), 1) as promedio FROM hechos_glucosa GROUP BY fuente_sede;
