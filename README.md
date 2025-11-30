@@ -53,6 +53,7 @@ Si deseas replicar este proyecto en tu entorno local, sigue estos pasos:
 ```bash
 git clone [https://github.com/TU_USUARIO/biomed-lab-etl.git](https://github.com/TU_USUARIO/biomed-lab-etl.git)
 cd biomed-lab-etl
+```
 
 # Se recomienda usar entorno virtual
 pip install pandas sqlalchemy psycopg2-binary faker openpyxl
@@ -62,6 +63,7 @@ pip install pandas sqlalchemy psycopg2-binary faker openpyxl
 Ejecutar el contenedor de Docker que levantará la instancia de PostgreSQL.
 ```bash
 docker-compose up -d
+```
 
 ### 4. Ejecución del Pipeline
 El proyecto incluye un generador de datos para simular el entorno hospitalario.
@@ -69,10 +71,12 @@ El proyecto incluye un generador de datos para simular el entorno hospitalario.
 **Paso A: Generar datos de prueba**
 ```bash
 python scripts/00_generar_datos_sucios.py
+```
 
 **Paso B: Correr el proceso ETL**
 ```bash
 python scripts/01_etl_pipeline.py
+```
 
 ## 📊 Resultados e Impacto
 Tras la ejecución del pipeline y el análisis de los datos centralizados, se identificó un **hallazgo crítico**:
